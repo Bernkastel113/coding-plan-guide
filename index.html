@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coding Plan 选择指南 · 17 家厂商 50 档套餐横评</title>
+  <meta name="description" content="Coding Plan 选择指南：汇总各厂商 AI 编程套餐的价格、额度口径、模型基准与优惠活动，支持筛选、搜索、排序与价格尺定位；购买前请以各官网实时页面为准。">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <nav class="site-nav" aria-label="站点导航">
+    <div class="container site-nav-inner">
+      <a class="brand" href="#hero">
+        <span class="brand-bar" aria-hidden="true"></span>
+        <span class="brand-full">Coding Plan 选择指南</span>
+        <span class="brand-short">CP 选择指南</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="#picks" data-spy="picks">怎么选</a>
+        <a class="nav-link" href="#plans" data-spy="plans">套餐对比</a>
+        <a class="nav-link" href="#ruler" data-spy="ruler">价格一览</a>
+        <a class="nav-link" href="#models" data-spy="models">模型对比</a>
+        <a class="nav-link" href="#deals" data-spy="deals">优惠活动</a>
+        <a class="nav-link" href="#notes" data-spy="notes">口径说明</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 数据时效横幅容器（SPEC §4.1a）：数据快照过期 >7 天时由 app.js renderStaleBanner 填充，平时保持为空、不占位 -->
+  <div id="stale-banner"></div>
+
+  <header id="hero" class="hero">
+    <div class="container">
+      <h1 class="hero-title" id="hero-title"></h1>
+      <p class="hero-lede" id="hero-lede"></p>
+      <div class="hero-badges" id="hero-badges"></div>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="#picks">先看推荐 · 怎么选</a>
+        <a class="btn btn--ghost" href="#plans">直接查总表</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="picks" class="section section--first" aria-labelledby="picks-title">
+      <div class="container">
+        <h2 class="section-title" id="picks-title">怎么选</h2>
+        <p class="section-sub">按场景给出起点选项，点击卡片底部链接前往官方页面确认最新价格。</p>
+        <div class="picks-grid" id="picks-grid"></div>
+      </div>
+    </section>
+
+    <section id="plans" class="section" aria-labelledby="plans-title">
+      <div class="container">
+        <h2 class="section-title" id="plans-title">套餐对比</h2>
+        <p class="section-sub">官方口径原样收录，支持按地区筛选、按关键词搜索与按月费排序。</p>
+        <div class="plan-controls" id="plan-controls"></div>
+        <p class="plan-table-note" id="plan-table-note"></p>
+        <div class="scroll-area">
+          <div class="table-scroll">
+          <table class="data-table plan-table">
+            <thead>
+              <tr>
+                <th scope="col">厂商</th>
+                <th scope="col">套餐</th>
+                <th scope="col">价格</th>
+                <th scope="col">性价比测算</th>
+                <th scope="col">BenchAlign</th>
+                <th scope="col">额度（官方口径）</th>
+                <th scope="col">模型</th>
+                <th scope="col">支持工具</th>
+                <th scope="col">备注</th>
+              </tr>
+            </thead>
+            <tbody id="plan-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <h3 class="notes-subhead">每亿 token 成本速览</h3>
+        <p class="subnote" id="cost-quicklook-sub"></p>
+        <div class="cost-quicklook" id="cost-quicklook"></div>
+      </div>
+    </section>
+
+    <section id="ruler" class="section" aria-labelledby="ruler-title">
+      <div class="container">
+        <h2 class="section-title" id="ruler-title">价格一览</h2>
+        <p class="section-sub">两条分段价格轴快速定位各档月费（段界数值见刻度），点圆点看档位详情。</p>
+        <div class="scroll-area scroll-area--ruler">
+          <div class="ruler-scroll">
+            <div class="ruler-lanes" id="ruler-lanes"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="models" class="section" aria-labelledby="models-title">
+      <div class="container">
+        <h2 class="section-title" id="models-title">模型对比</h2>
+        <p class="section-sub">各家当前主力编程模型的参数、API 价与公开基准成绩。</p>
+        <div class="scroll-area">
+          <div class="table-scroll">
+            <table class="data-table model-table">
+            <thead>
+              <tr>
+                <th scope="col">模型</th>
+                <th scope="col">上下文</th>
+                <th scope="col">API 价（输入/输出 / 百万 tokens）</th>
+                <th scope="col" class="th-num">BenchAlign<span class="th-sub">9-22 重校</span></th>
+                <th scope="col" class="th-num">TB 2.1<span class="th-sub">官方/†三方</span></th>
+                <th scope="col" class="th-num">TB 4.0<span class="th-sub">官方/†三方</span></th>
+                <th scope="col" class="th-num">SWE-V<span class="th-sub">渐停报/†三方</span></th>
+                <th scope="col" class="th-num">SWE-Pro<span class="th-sub">官方/†三方</span></th>
+                <th scope="col" class="th-num">DeepSWE<span class="th-sub">防污染·转述</span></th>
+                <th scope="col" class="th-num">AA 指数<span class="th-sub">v4.3.2 聚合</span></th>
+                <th scope="col">一句话定位</th>
+              </tr>
+            </thead>
+            <tbody id="model-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+        <p class="model-table-note" id="model-table-note"></p>
+        <div class="bench-grid" id="bench-grid"></div>
+        <p class="bench-note" id="bench-note"></p>
+
+        <h3 class="notes-subhead">输出价 × 编程基准象限</h3>
+        <p class="subnote" id="scatter-sub"></p>
+        <div class="plan-tabs scatter-tabs" id="scatter-tabs" role="group" aria-label="切换象限图基准"></div>
+        <div class="scroll-area scroll-area--scatter">
+          <div class="scatter-scroll">
+            <div class="scatter-box" id="scatter-plot"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="deals" class="section" aria-labelledby="deals-title">
+      <div class="container">
+        <h2 class="section-title" id="deals-title">优惠活动</h2>
+        <p class="section-sub">限时优惠、常驻福利与重要变动，按重要性先后排列。</p>
+        <div class="deal-list" id="deal-list"></div>
+      </div>
+    </section>
+
+    <section id="notes" class="section section--last" aria-labelledby="notes-title">
+      <div class="container">
+        <h2 class="section-title" id="notes-title">口径说明</h2>
+        <p class="section-sub">额度单位、常见问题、免责声明与数据来源。</p>
+
+        <h3 class="notes-subhead">单位对照表</h3>
+        <div class="scroll-area scroll-area--units">
+          <div class="table-scroll table-scroll--light">
+            <table class="data-table units-table">
+            <thead>
+              <tr>
+                <th scope="col">厂商</th>
+                <th scope="col">计量单位</th>
+                <th scope="col">说明</th>
+              </tr>
+            </thead>
+            <tbody id="units-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <h3 class="notes-subhead">常见问题</h3>
+        <div class="faq-list" id="faq-list"></div>
+
+        <div class="disclaimer" id="disclaimer"></div>
+
+        <h3 class="notes-subhead">数据来源索引</h3>
+        <ul class="source-list" id="source-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer-inner">
+      <p class="footer-left" id="footer-left"></p>
+      <p class="footer-right">纯静态页面 · 数据在 assets/data/data.js 维护</p>
+    </div>
+  </footer>
+
+  <script src="assets/data/data.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</body>
+</html>

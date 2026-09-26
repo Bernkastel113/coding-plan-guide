@@ -1,0 +1,9 @@
+# 白名单式忽略：根目录默认全部忽略，仅重新纳入下方列出的文件
+# 任何新出现的杂散文件（截图/草稿/内部文档）都不会被意外上传
+/*
+!.gitignore
+!README.md
+!.nojekyll
+!index.html
+!verify.js
+!assets/

@@ -1,0 +1,953 @@
+/* =====================================================================
+   Coding Plan 选择指南 — 样式
+   唯一依据：DESIGN_SPEC.md（设计令牌 / 排版 / 逐区块规格 / 交互 / 响应式）
+   ===================================================================== */
+
+/* ---------------- 设计令牌（SPEC §2） ---------------- */
+:root {
+  /* 颜色 */
+  --bg: #F4F5F7;            /* 页面底色：冷灰纸 */
+  --surface: #FFFFFF;       /* 表面/表格 */
+  --ink: #1C2433;           /* 主文字：蓝黑墨 */
+  --ink-2: #5A6478;         /* 次级文字 */
+  --ink-3: #656E80;         /* 辅助小字。相对规格 §2 原值 #8B93A7 加深：原值白底实测仅 3.07:1，违反 §6「对比度 ≥ AA」底线（node 实算本值：白底 5.13、--bg 4.70、#FAFAFC 4.92，均 ≥4.5）。待设计者确认后可回改规格 */
+  --line: #E2E5EB;          /* 分隔线 */
+  --line-strong: #C9CEDA;   /* 强分隔线/表头下线 */
+  --accent: #3157D6;        /* 主强调：靛蓝墨 */
+  --accent-ink: #24409F;    /* 链接 hover 深一档 */
+  --accent-wash: #EDF1FC;   /* 8% 洗淡底 */
+  --amber: #9A5B00;         /* 优惠/限时 */
+  --amber-wash: #FBF3E4;
+  --green: #0E7A4F;         /* 常驻/正向 */
+  --green-wash: #E9F5EF;
+
+  /* 圆角：账簿感，小圆角 */
+  --r-s: 4px;
+  --r-m: 8px;
+
+  /* 字体 */
+  --font-display: Georgia, "Times New Roman", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", SimSun, serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+
+  /* 字号（1.2 阶） */
+  --fs-hero: 44px;
+  --fs-h2: 28px;
+  --fs-h3: 18px;
+  --fs-body: 14.5px;
+  --fs-small: 13px;
+  --fs-tiny: 12px;
+
+  /* 布局 */
+  --w: 1180px;
+  --nav-h: 60px;
+  --sp-section: 72px;
+  --shadow-nav: 0 1px 0 var(--line);
+  --shadow-pop: 0 4px 16px rgba(28, 36, 51, .10);
+}
+
+/* ---------------- 基础 ---------------- */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  font-variant-numeric: tabular-nums; /* 数字一律等宽 */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, ul, ol { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-ink); text-decoration: underline; }
+
+button, input, select { font-family: inherit; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+[id] { scroll-margin-top: calc(var(--nav-h) + 12px); }
+
+.container { max-width: var(--w); margin: 0 auto; padding: 0 24px; }
+
+/* ---------------- nav（SPEC §4.1） ---------------- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  background: var(--surface);
+  box-shadow: var(--shadow-nav);
+}
+
+.site-nav-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.brand:hover { color: var(--ink); text-decoration: none; }
+
+.brand-bar { width: 8px; height: 28px; background: var(--accent); flex: none; }
+.brand-short { display: none; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  margin-left: auto;
+  padding-left: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+
+.nav-link {
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  padding: 4px 0;
+}
+.nav-link:hover { color: var(--accent-ink); text-decoration: underline; }
+.nav-link.is-active {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 6px;
+}
+
+/* ---------------- 数据时效横幅（SPEC §4.1a，第七轮新增） ----------------
+   仅数据快照过期（days > 7）时由 JS 挂此类到 #stale-banner（app.js renderStaleBanner）；
+   未过期容器为空 div、无类名零高度不占位。普通文档流全宽条、非 sticky——
+   nav 的 top:0 吸顶（sticky 相对视口）不受其后兄弟节点影响，运行时测量亦不涉及本条 */
+.stale-banner {
+  background: var(--amber-wash);
+  border-top: 1px solid #E8D5AE; /* 同 .bench-note 的琥珀边线（非令牌色，规格给定字面值） */
+  border-bottom: 1px solid #E8D5AE;
+  color: var(--amber);
+  font-size: var(--fs-small); /* 13px */
+  text-align: center;
+  padding: 10px 16px;
+  font-variant-numeric: tabular-nums; /* 天数与日期等宽（§4.1a） */
+}
+
+/* ---------------- hero（SPEC §4.2） ---------------- */
+.hero { padding: 88px 0 64px; }
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  line-height: 1.25;
+  font-weight: 700;
+  max-width: 780px;
+  animation: hero-in .35s ease-out both;
+}
+
+.hero-lede {
+  margin-top: 18px;
+  font-size: 16.5px;
+  color: var(--ink-2);
+  max-width: 640px;
+  animation: hero-in .35s ease-out .15s both; /* 与标题合计 0.5s */
+}
+
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badges { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.hero-badge {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-s);
+  padding: 3px 10px;
+}
+.hero-badge:hover { color: var(--accent-ink); text-decoration: underline; }
+
+.hero-actions { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 12px; }
+
+.btn {
+  display: inline-block;
+  border-radius: var(--r-s);
+  padding: 10px 18px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.btn--primary { background: var(--accent); color: #FFFFFF; }
+.btn--primary:hover { background: var(--accent-ink); color: #FFFFFF; text-decoration: none; }
+.btn--ghost { border: 1px solid var(--accent); color: var(--accent); background: transparent; }
+.btn--ghost:hover { background: var(--accent-wash); color: var(--accent-ink); text-decoration: none; }
+
+/* ---------------- 区块骨架（SPEC §3/§7） ---------------- */
+.section { padding: calc(var(--sp-section) / 2) 0; } /* 相邻区块合计间距 = --sp-section */
+.section--first { padding-top: 28px; }
+.section--last { padding-bottom: 44px; }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  color: var(--ink);
+}
+.section-title::after { /* 刊物题花 */
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--ink);
+  margin-top: 12px;
+}
+
+.section-sub { margin-top: 10px; font-size: var(--fs-body); color: var(--ink-2); }
+
+/* 子区块副注（速览条形图 / 散点图，SPEC §4.5a/§4.6a：12px --ink-3） */
+.subnote { margin-top: 8px; font-size: var(--fs-tiny); color: var(--ink-3); }
+
+/* ---------------- picks 怎么选（SPEC §4.3） ---------------- */
+.picks-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.pick-card {
+  position: relative; /* 综合分角标定位 */
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.pick-card--anchor { border-left: 2px solid var(--accent); } /* 第一张视觉锚点 */
+
+/* 卡片右上角综合分角标（SPEC §4.3） */
+.pick-overall {
+  position: absolute;
+  top: 15px;
+  right: 16px;
+  background: var(--accent-wash);
+  color: var(--accent);
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  border-radius: var(--r-s);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.pick-scene { font-size: 12px; color: var(--ink-3); }
+
+.pick-title {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  line-height: 1.4;
+  padding-right: 56px; /* 避让右上角综合分角标 */
+}
+
+.pick-price { margin-top: 8px; font-size: 14px; font-weight: 700; color: var(--accent); }
+
+/* 评分块：上下各一条 1px --line 分隔线包夹，三行维度条 + 分值（SPEC §4.3） */
+.pick-rating {
+  margin-top: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.pick-rating-row { display: flex; align-items: center; gap: 8px; }
+.pick-dim { width: 56px; flex: none; font-size: 11.5px; line-height: 1.5; color: var(--ink-2); }
+.pick-cells { display: flex; gap: 2px; }
+.pick-cell { display: inline-block; width: 14px; height: 6px; border-radius: 1px; }
+.pick-cell--full { background: var(--accent); }
+.pick-cell--half { background: var(--accent); opacity: .45; } /* 半分格半透明填充 */
+.pick-cell--empty { background: transparent; border: 1px solid var(--line); }
+.pick-score { margin-left: auto; font-size: 11.5px; color: var(--ink); }
+
+.pick-desc { margin-top: 10px; font-size: var(--fs-small); color: var(--ink-2); flex: 1; }
+
+.pick-link { margin-top: 14px; font-size: 12.5px; align-self: flex-start; }
+
+/* ---------------- plans 控制行（SPEC §4.4） ---------------- */
+.plan-controls {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.plan-tabs { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.control-tab {
+  font-size: var(--fs-small);
+  padding: 7px 14px;
+  border-radius: var(--r-s);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.control-tab:hover { color: var(--accent-ink); border-color: var(--line-strong); }
+.control-tab.is-active {
+  color: var(--accent);
+  background: var(--accent-wash);
+  border-color: var(--accent);
+}
+
+.control-input,
+.control-select {
+  font-size: var(--fs-small);
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--ink);
+}
+.control-input { width: 240px; max-width: 100%; }
+.control-input::placeholder { color: var(--ink-3); }
+.control-input:focus, .control-select:focus { border-color: var(--accent); }
+.control-select { cursor: pointer; }
+
+/* 数值筛选（月额度 ≥ / BenchAlign ≥）：输入 130px，前置 label 12.5px --ink-2（SPEC §4.4） */
+.control-input--num { width: 130px; }
+.control-num { display: inline-flex; align-items: center; gap: 6px; }
+.control-num-label, .control-num-unit { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+
+/* 「清除筛选」文字按钮：重置 query/数值/排序，tab 保留 */
+.control-clear {
+  border: 0;
+  background: none;
+  padding: 7px 2px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color .15s ease;
+}
+.control-clear:hover { color: var(--accent); }
+
+.plan-table-note { margin-top: 18px; font-size: var(--fs-tiny); color: var(--ink-3); text-align: right; }
+
+/* ---------------- 通用表格（SPEC §4.4/§4.6/§4.8） ---------------- */
+.scroll-area { position: relative; margin-top: 10px; }
+.plan-table-note + .scroll-area { margin-top: 8px; }
+.scroll-area--ruler { margin-top: 28px; }
+.scroll-area--units { margin-top: 12px; }
+
+/* 右侧渐隐提示：内容可继续向右滚时露出（规格 §4.4，纯渐变，不加阴影）。
+   开关由 JS 依据 scrollWidth/scrollLeft 挂 .is-scrollable 类 */
+.scroll-area::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  right: 1px;
+  width: 28px;
+  border-radius: 0 var(--r-m) var(--r-m) 0;
+  /* 遮罩透明度 .82（SPEC §4.4：由 .95 降至 .82，减轻「盖字」感） */
+  background: linear-gradient(to left, rgba(255, 255, 255, .82), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity .15s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.scroll-area.is-scrollable::after { opacity: 1; }
+
+/* ---------------- 横向滚动增强（SPEC §5.9 initScrollX） ----------------
+   边缘导航钮：30px 圆钮，绝对定位于 .scroll-area（滚动容器之外的定位上下文——
+   绝对定位子元素若以滚动容器为包含块会随内容横移），垂直居中、左右 inset 6px。
+   悬停容器或其内任意子元素（:hover 冒泡）或钮自身聚焦（focus-within，保证键盘
+   可达，§6）时显现；只亮可滚方向（disabled 由 JS 维护，不可滚方向悬停时淡显示） */
+.scrollx-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1;
+  box-shadow: var(--shadow-pop);
+  cursor: pointer;
+  z-index: 3; /* 高于 .scroll-area::after 渐隐遮罩（z-2） */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .15s ease, visibility .15s ease;
+}
+.scrollx-btn--prev { left: 6px; }
+.scrollx-btn--next { right: 6px; }
+.scroll-area.has-overflow:hover .scrollx-btn,
+.scroll-area.has-overflow:focus-within .scrollx-btn {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.scroll-area.has-overflow:hover .scrollx-btn:disabled,
+.scroll-area.has-overflow:focus-within .scrollx-btn:disabled { opacity: .35; cursor: default; }
+.scroll-area.has-overflow .scrollx-btn:not(:disabled):hover { color: var(--ink); border-color: var(--line-strong); }
+
+.table-scroll {
+  overflow-x: auto; /* 窄屏容器内横向滚动 */
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+}
+
+.data-table { width: 100%; border-collapse: collapse; }
+/* 9 列 min-width 1440（SPEC §4.4：1280 在 1300–1440 视口下两列文字贴边、视觉粘连），窄屏容器内横向滚动 */
+.plan-table { min-width: 1440px; }
+/* 模型表 11 列含 7 个分数列（SPEC §4.6；第六轮加 DeepSWE 列后从 1560 上调），窄屏容器内横向滚动 */
+.model-table { min-width: 1700px; }
+.units-table { min-width: 640px; }
+
+.data-table th {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  background: #FAFAFC;
+  border-bottom: 2px solid var(--line-strong);
+  padding: 10px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  text-align: left;
+  vertical-align: top;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.plan-table .plan-row:hover td,
+.model-table .model-row:hover td { background: rgba(237, 241, 252, .55); }
+
+/* 徽章（全部带 title，见 HTML/JS） */
+.badge {
+  display: inline-block;
+  font-size: 10.5px;
+  line-height: 1.5;
+  padding: 1px 6px;
+  border-radius: var(--r-s);
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.badge--promo { background: var(--amber-wash); color: var(--amber); }
+.badge--watch { background: var(--accent-wash); color: var(--accent); }
+.badge--hot { background: var(--accent-wash); color: var(--accent); }
+.badge--alert { background: var(--accent-wash); color: var(--accent); }
+.badge--evergreen { background: var(--green-wash); color: var(--green); }
+.badge--region-cn { background: var(--green-wash); color: var(--green); }
+.badge--region-overseas { background: var(--bg); color: var(--ink-3); border: 1px solid var(--line-strong); }
+/* 剩余天数徽章（SPEC §4.7a）：剩 N 天 = 琥珀；已结束 = 灰（--bg 底 --ink-3 字） */
+.badge--days { background: var(--amber-wash); color: var(--amber); }
+.badge--ended { background: var(--bg); color: var(--ink-3); }
+
+/* 主表单元格 */
+.vendor-name { display: block; color: var(--ink); font-size: 14px; font-weight: 600; }
+.vendor-name:hover { color: var(--accent-ink); text-decoration: underline; }
+.vendor-cell .badge { margin-top: 4px; }
+
+.cell-plan { font-size: 14px; font-weight: 600; color: var(--ink); }
+.cell-plan .badge { margin-left: 6px; }
+
+.cell-price-main { font-size: 14.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.cell-price-sub { margin-top: 2px; font-size: var(--fs-tiny); color: var(--ink-3); }
+
+/* 性价比测算 / BenchAlign 两列（SPEC §4.4 九列） */
+.cell-cost { min-width: 110px; }
+.cell-cost-main { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.cell-cost-sub { margin-top: 2px; font-size: var(--fs-tiny); color: var(--ink-3); }
+/* 测算列第三行「测算: quotaModel」（SPEC §4.4：10.5px --ink-3；quotaModel 为 null 时省略） */
+.cell-cost-model { margin-top: 2px; font-size: 10.5px; color: var(--ink-3); }
+.cell-cost-none, .cell-ba-none { color: var(--ink-3); }
+.cell-ba { min-width: 96px; text-align: right; }
+.cell-ba-val { font-size: 14px; font-weight: 700; color: var(--accent); }
+.cell-ba-note { margin-top: 2px; font-size: 11.5px; color: var(--ink-3); }
+
+.cell-quota { min-width: 220px; color: var(--ink-2); }
+.cell-models { color: var(--ink-2); }
+/* 列级最小宽（SPEC §4.4）：.cell-tools 200px、.cell-note 170px */
+.cell-tools { min-width: 200px; color: var(--ink-2); }
+.cell-note { min-width: 170px; color: var(--ink-3); }
+
+.group-row td {
+  background: #FAFAFC;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--ink-2);
+  padding: 8px 14px;
+}
+.group-dot { display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; }
+.group-dot--cn { background: var(--green); }
+.group-dot--overseas { background: var(--line-strong); }
+
+/* 默认排序的厂商聚集视觉（SPEC §4.4）：plan-row--group 标记厂商组内的行，
+   第偶数个厂商组整组 #FAFAFC 底，组间 1px --line-strong 分隔（plan-row--gsep）；
+   数值排序时 JS 不挂这两个类（行 hover 优先级更高仍生效） */
+.plan-table .plan-row--group td { background: #FAFAFC; }
+.plan-table .plan-row--gsep td { border-top: 1px solid var(--line-strong); }
+
+.empty-row td { text-align: center; color: var(--ink-3); padding: 32px 14px; }
+
+/* ---------------- 性价比速览条形图（SPEC §4.5a） ---------------- */
+.cost-quicklook { margin-top: 12px; }
+
+.cost-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  font-size: var(--fs-tiny);
+  color: var(--ink-2);
+}
+.cost-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.cost-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.cost-swatch--cn { background: var(--accent); }
+.cost-swatch--overseas { background: var(--ink-2); }
+.cost-legend-min { margin-left: auto; color: var(--ink-3); }
+
+/* 两列 grid（≤900px 单列，见响应式段）；行距 6px；行内布局同 .bench-item 模式 */
+.cost-grid { margin-top: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 32px; }
+
+.cost-item { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cost-label {
+  width: 150px;
+  flex: none;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cost-track { flex: 1; min-width: 0; }
+.cost-bar {
+  display: block;
+  height: 12px;
+  width: var(--w-pct, 0%);
+  max-width: 100%;
+  background: var(--accent); /* 国内 */
+  border-radius: 4px;
+}
+.cost-item--overseas .cost-bar { background: var(--ink-2); } /* 海外 */
+.cost-value { width: 64px; flex: none; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--ink); }
+
+/* ---------------- ruler 价格一览（SPEC §4.5） ---------------- */
+.ruler-scroll { overflow-x: auto; } /* 窄屏容器内横向滚动 */
+
+.ruler-lanes { min-width: 680px; display: flex; flex-direction: column; gap: 26px; padding: 4px 0 8px; }
+
+.ruler-lane { position: relative; height: 200px; } /* SPEC §4.5：高 200px（四行标签） */
+
+.ruler-lane-label { position: absolute; top: 0; left: 0; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+
+.ruler-axis { position: absolute; left: 0; right: 0; top: 88px; height: 2px; background: var(--line-strong); }
+
+/* 段界刻度：竖虚线 + 段界数值（轴为分段比例，低价段等宽展开） */
+.ruler-tick { position: absolute; top: 56px; height: 32px; width: 0; border-left: 1px dashed var(--line-strong); left: var(--x); }
+.ruler-tick-val {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  transform: translateX(50%);
+  font-style: normal;
+  font-size: 10.5px;
+  line-height: 1;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.ruler-tick--end { left: auto; right: 0; }
+.ruler-tick--end .ruler-tick-val { right: 0; transform: none; }
+/* 0 段界（左端）：数值贴虚线右侧标注，避免平移出泳道 */
+.ruler-tick--start .ruler-tick-val { left: 0; right: auto; transform: none; }
+
+.ruler-dot {
+  position: absolute;
+  top: 89px;
+  left: var(--x);
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface); /* 白色 2px 描边 */
+  cursor: pointer;
+  z-index: 2;
+  transition: width .15s ease, height .15s ease;
+}
+.ruler-dot:hover { width: 16px; height: 16px; }
+.ruler-dot--hollow { background: var(--surface); border-color: var(--accent); }
+
+.ruler-tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  box-shadow: var(--shadow-pop);
+  padding: 7px 10px;
+  font-size: var(--fs-tiny);
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--ink-2);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity .15s ease;
+}
+.ruler-dot:hover .ruler-tip,
+.ruler-dot:focus-visible .ruler-tip { opacity: 1; visibility: visible; }
+.ruler-tip-label { display: block; }
+.ruler-tip-value { display: block; font-weight: 700; color: var(--ink); }
+.ruler-dot--edge-start .ruler-tip { left: -6px; transform: none; }
+.ruler-dot--edge-end .ruler-tip { left: auto; right: -6px; transform: none; }
+
+/* 标签四行排布（JS 测宽贪心分配，--x 为最终像素左坐标；行距 8/30/52/74px，SPEC §4.5） */
+.ruler-label {
+  position: absolute;
+  top: 89px;
+  left: var(--x);
+  font-size: 11px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+.ruler-label--r0 { transform: translateY(8px); }
+.ruler-label--r1 { transform: translateY(30px); }
+.ruler-label--r2 { transform: translateY(52px); }
+.ruler-label--r3 { transform: translateY(74px); }
+
+/* ---------------- models 模型对比（SPEC §4.6，11 列分列版） ---------------- */
+.cell-model-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.cell-model-name + .badge { margin-left: 6px; }
+.cell-ctx { color: var(--ink-2); white-space: nowrap; }
+.cell-api { white-space: nowrap; }
+.cell-tag { color: var(--ink-3); }
+
+/* 分数列头：右对齐 + 头下 th-sub 口径注（11px --ink-3，SPEC §4.6） */
+.data-table th.th-num { text-align: right; }
+.th-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+/* 七个分数列（ba/tb21/tb40/swev/swepro/dswe/aa 各自独立）：右对齐 tabular 13.5px/600；
+   无分数显 —（--ink-3，绝不编数） */
+.data-table td.cell-score {
+  text-align: right;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.data-table td.cell-score--none { font-weight: 400; color: var(--ink-3); }
+/* 列内非空最高分整格突出：--accent-wash 底 + --accent 字（置后覆盖行 hover 底色，不加角标） */
+.model-table .model-row td.cell-score--top { background: var(--accent-wash); color: var(--accent); }
+
+/* † 三方口径上标（SPEC §4.6 第五轮）：tpCols 所列分数列数值后 10px --ink-3 上标 */
+.score-tp { margin-left: 1px; font-size: 10px; font-weight: 400; color: var(--ink-3); }
+
+/* 模型表 † 图例行（SPEC §4.6：表下说明区右侧，12px --ink-3） */
+.model-table-note { margin-top: 8px; font-size: var(--fs-tiny); color: var(--ink-3); text-align: right; }
+
+/* 基准条形榜网格（SPEC §4.6）：repeat(auto-fit, minmax(215px, 1fr)) 自适应列数、
+   窄屏自动降列，无需手工断点（原固定四列 + 两档媒体查询已移除）。
+   1180 容器内容宽 1132px、列距 28px 时放下 4 列（5 列需 5×215 + 4×28 = 1187px），
+   第 5、6 组（Vals 复测 / DeepSWE）自然换行 */
+.bench-grid { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 28px; }
+
+.bench-name { font-size: var(--fs-small); font-weight: 600; color: var(--ink); line-height: 1.5; }
+
+.bench-items { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+/* 行内 gap 8px（原 10px）：label 150 + 数值 40 + 2×8 = 206px ≤ 列最小宽 215px，
+   保证 minmax(215px,1fr) 最窄列下条形仍留有宽度（原 150+48+2×10=218px 会在窄列把条形压没） */
+.bench-item { display: flex; align-items: center; gap: 8px; }
+
+.bench-label {
+  width: 150px;
+  flex: none;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bench-track { flex: 1; min-width: 0; }
+
+.bench-bar {
+  display: block;
+  height: 14px;
+  width: var(--w-pct, 0%);
+  max-width: 100%;
+  background: var(--accent);
+  border-radius: var(--r-s);
+}
+.bench-item--top .bench-bar { background: var(--ink); } /* 头名深色 */
+/* 非默认底色的三组（SPEC §4.6 六组；类名由 JS 按组名关键词挂，不按组序号）：
+   AA 组（第三方聚合口径）--ink-2、Vals 三方复测组 --green、DeepSWE 防污染组 --amber。
+   置于头名规则之后：特殊组整组（含组内头名）均用该组底色 */
+.bench-group--aa .bench-bar { background: var(--ink-2); }
+.bench-group--vals .bench-bar { background: var(--green); }
+.bench-group--dswe .bench-bar { background: var(--amber); }
+
+.bench-value { width: 40px; flex: none; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--ink); }
+
+.bench-note {
+  margin-top: 24px;
+  background: var(--amber-wash);
+  border: 1px solid #E8D5AE;
+  border-radius: var(--r-m);
+  padding: 14px 16px;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+/* ---------------- 输出价 × 编程基准象限图 v2（SPEC §4.6a） ---------------- */
+.scatter-tabs { margin-top: 12px; } /* 基准切换 tab（复用 .control-tab / .plan-tabs） */
+.scatter-scroll { overflow-x: auto; } /* ≤720px 容器横向滚动 */
+/* 象限图外新包一层 .scroll-area（index.html 同步改动）：为边缘钮提供滚动容器之外的
+   定位上下文（滚动容器自身的绝对定位子元素会随内容横移），右侧渐隐遮罩亦随滚动生效；
+   外层承接原 12px 顶距，视觉不变 */
+.scroll-area--scatter { margin-top: 12px; }
+.scroll-area--scatter .scatter-scroll { margin-top: 0; }
+.scatter-box { min-width: 640px; max-width: 720px; }    /* 桌面 720px 内容宽 */
+.scatter-svg { display: block; width: 100%; height: auto; }
+
+.scatter-gridline { stroke: var(--line); stroke-width: 1; }
+.scatter-axis { stroke: var(--line-strong); stroke-width: 1; }
+.scatter-median { stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 4 4; }
+.scatter-tick-label { font-size: 10.5px; fill: var(--ink-2); }
+.scatter-label { font-size: 10.5px; fill: var(--ink-2); }
+
+/* 象限整块底色与角标文字（SPEC §4.6a）：左上 rgba(14,122,79,.06) + --green「又便宜又强」；
+   右下 rgba(28,36,51,.03) + --ink-3「贵且弱」 */
+.scatter-quadrant--good { fill: rgba(14, 122, 79, .06); }
+.scatter-quadrant--weak { fill: rgba(28, 36, 51, .03); }
+.scatter-motto--good { font-size: 11px; fill: var(--green); }
+.scatter-motto--weak { font-size: 11px; fill: var(--ink-3); }
+
+.scatter-dot { fill: var(--accent); transition: r .15s ease; } /* 海外厂商默认 --accent */
+.scatter-dot--cn { fill: var(--green); } /* 国内厂商绿点 */
+.scatter-dot:hover { r: 7; } /* hover 放大（SPEC §4.6a），<title> 原生 tooltip */
+
+/* 左下角图例：两枚 10px 色点 + 文字（SPEC §4.6a） */
+.scatter-legend-dot--cn { fill: var(--green); }
+.scatter-legend-dot--ov { fill: var(--accent); }
+.scatter-legend-text { font-size: 10.5px; fill: var(--ink-2); }
+
+/* ---------------- deals 优惠活动（SPEC §4.7） ---------------- */
+.deal-list { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; }
+
+.deal-item {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: var(--r-m);
+  padding: 14px 18px;
+}
+.deal-item--promo { border-left-color: var(--amber); }
+.deal-item--alert { border-left-color: var(--accent); }
+.deal-item--evergreen { border-left-color: var(--green); }
+
+.deal-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+
+.deal-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+
+.deal-until { margin-left: auto; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+.deal-until .badge { margin-right: 6px; } /* 剩余天数徽章置于 until 文字前（SPEC §4.7a） */
+
+.deal-detail { margin-top: 6px; font-size: var(--fs-small); color: var(--ink-2); }
+.deal-link { margin-left: 8px; font-size: 12.5px; white-space: nowrap; }
+
+/* ---------------- notes 口径说明（SPEC §4.8） ---------------- */
+.notes-subhead { margin-top: 44px; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+.units-table td { padding: 14px; } /* 行高更松 */
+.cell-unit-vendor { color: var(--ink); font-weight: 600; }
+.cell-unit { color: var(--ink-2); white-space: nowrap; }
+.cell-unit-desc { color: var(--ink-2); }
+
+.faq-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 10px 16px;
+}
+.faq-item summary {
+  position: relative;
+  padding-right: 28px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+";
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+.faq-item[open] summary::after { content: "−"; }
+.faq-a { margin-top: 8px; font-size: 14px; color: var(--ink-2); }
+
+.disclaimer {
+  margin-top: 36px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  padding: 14px 18px;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.source-list { margin-top: 12px; columns: 2; column-gap: 40px; font-size: var(--fs-small); }
+.source-list li { break-inside: avoid; padding: 4px 0; color: var(--ink-2); }
+.source-name { color: var(--ink); font-weight: 600; }
+
+/* ---------------- footer（SPEC §4.9） ---------------- */
+.site-footer { background: var(--surface); border-top: 1px solid var(--line); padding: 28px 0; }
+
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  font-size: var(--fs-small);
+  color: var(--ink-3);
+}
+
+/* 分层吸顶：≥1101px 筛选行吸顶（位于滚动容器外，不受表格宽度影响）；
+   ≥1756px 表格自然宽（min-width 1440 上调后实测为 1440px）可被容纳——
+   表格左缘 + 外层左右边框到视口右缘需放得下：(视口宽 + 1180)/2 ≥ 1440 + 26，
+   即视口 ≥ 1752，取 1756 留余量——此时关闭横向滚动并吸顶表头，
+   thead 顶距 = 筛选行底沿（JS 测量后设 --plans-head-offset）；其余宽度容器内横向滚动 */
+.data-table thead th:first-child { border-top-left-radius: var(--r-m); }
+.data-table thead th:last-child { border-top-right-radius: var(--r-m); }
+
+@media (min-width: 1101px) {
+  .plan-controls {
+    position: sticky;
+    top: calc(var(--nav-h) + 8px);
+    z-index: 6;
+    background: var(--bg);
+    padding: 8px 0;
+  }
+}
+
+@media (min-width: 1756px) {
+  /* 外层盒宽 = JS 实测的表格自然宽（offsetWidth + 左右边框），让边框/圆角完整包裹
+     表格，避免容器右缘的边框线、圆角与底边框切进行内 */
+  #plans .table-scroll {
+    overflow-x: visible;
+    width: var(--plan-scroller-w, auto);
+  }
+  .plan-table thead th {
+    position: sticky;
+    top: calc(var(--nav-h) + 8px + var(--plans-head-offset, 56px));
+    z-index: 5;
+  }
+}
+
+/* 模型名与「新锐」徽章保持同行 */
+.model-table td:first-child { white-space: nowrap; }
+
+/* 窄屏导航链接可横向滚动时，右侧渐隐提示（JS 挂 .nav-has-more） */
+.site-nav-inner { position: relative; }
+.site-nav.nav-has-more .site-nav-inner::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 0;
+  width: 28px;
+  background: linear-gradient(to left, var(--surface), rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* ---------------- 响应式（SPEC §6） ---------------- */
+@media (max-width: 900px) {
+  .cost-grid { grid-template-columns: 1fr; } /* 速览条形图单列（SPEC §4.5a） */
+}
+
+@media (max-width: 720px) {
+  .hero-title { font-size: 32px; }
+  .brand-full { display: none; }
+  .brand-short { display: inline; }
+  .source-list { columns: 1; }
+}
+
+@media (max-width: 600px) {
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+  .btn { text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+  .hero-title { font-size: 28px; }
+  .picks-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .hero-title, .hero-lede { opacity: 1; transform: none; }
+}
