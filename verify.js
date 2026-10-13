@@ -45,10 +45,10 @@ if (!D) { ng('window.CP_DATA 缺失'); finish(); }
 
 const M = D.models || [];
 /* 结构与计数 */
-M.length === 21 ? ok('models = 21（当前收录口径）') : ng('models 应为 21，实际 ' + M.length);
+M.length === 23 ? ok('models = 23（当前收录口径）') : ng('models 应为 23，实际 ' + M.length);
 (D.benchmarks || []).length === 6 ? ok('benchmarks = 6 组') : ng('benchmarks 应为 6 组，实际 ' + (D.benchmarks || []).length);
 (D.vendors || []).length === 17 ? ok('vendors = 17 家') : ng('vendors 应为 17，实际 ' + (D.vendors || []).length);
-(D.deals || []).length === 14 ? ok('deals = 14 条') : ng('deals 应为 14，实际 ' + (D.deals || []).length);
+(D.deals || []).length === 17 ? ok('deals = 17 条') : ng('deals 应为 17，实际 ' + (D.deals || []).length);
 
 /* 模型字段 */
 const need = ['name', 'vendor', 'region', 'date', 'ctx', 'apiPrice', 'ba', 'tb21', 'tb40', 'swev', 'swepro', 'dswe', 'aa', 'outUsd', 'tag'];
